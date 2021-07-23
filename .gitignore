@@ -1,0 +1,14 @@
+# 文件
+*.iml
+local.properties
+.DS_Store
+.externalNativeBuild
+.cxx
+
+# 文件夹
+.gradle
+.idea
+build/
+captures/
+dependencies/
+deprecate/
