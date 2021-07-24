@@ -1,18 +1,6 @@
-buildscript {
-    repositories {
-        jcenter()
-    }
-    dependencies {
-        //这里我写的时候是这个版本
-        classpath 'com.github.dcendents:android-maven-gradle-plugin:2.1'
-    }
-}
-//==============================JitPack 上传插件配置 end=======================
-
 plugins {
     id 'java-library'
     id 'kotlin'
-    // id 'kotlin-kapt'
 }
 
 java {
@@ -20,30 +8,10 @@ java {
     targetCompatibility = JavaVersion.VERSION_1_8
 }
 
-group rootProject.group
-version rootProject.version
-//group "com.mercer.mskj"
-//version '2.0.5'
-
 dependencies {
-
     implementation 'com.squareup:kotlinpoet:1.8.0'
-    // implementation 'com.google.auto.service:auto-service-annotations:1.0'
-    // kapt 'com.google.auto.service:auto-service:1.0'
-
     implementation 'com.squareup.retrofit2:retrofit:2.9.0'
-    // implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core:1.5.0"
-    // implementation "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
-
-    // implementation "com.mskj.mercer:adaptive-retrofit-core:${version}"
     implementation project(':core')
-
 }
 
-//apply from: rootProject.file("script/uploadArchives.gradle")
-
-//==============================JitPack 上传插件配置 start=====================
-apply plugin: 'com.github.dcendents.android-maven'
-//组名 com.github是固定的,后面的sweetying520是我Github的用户名,替换成你自己的就可以了
-group = 'com.github.luhaibing'
-
+apply from: rootProject.file("publishJavaLib.gradle")
