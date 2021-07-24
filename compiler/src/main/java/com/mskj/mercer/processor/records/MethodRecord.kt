@@ -193,7 +193,7 @@ data class MethodRecord(
             }
             FLOW_CLASS_NAME -> {
                 // Flow
-                builder.addCode("return flow {\r\n")
+                builder.addCode("return flow{\r\n")
                     .addCode("emit(\r\n")
                     .addCode(methodStringBuilder.toString(), converter ?: typeConverter)
                     .addCode(".await()")
