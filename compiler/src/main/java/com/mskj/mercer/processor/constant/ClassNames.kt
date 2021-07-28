@@ -43,7 +43,17 @@ val PRIMEVAL_MAP = hashMapOf(
     java.lang.Float::class.java.asTypeName() to FLOAT,
     java.lang.Double::class.java.asTypeName() to DOUBLE,
     java.lang.Number::class.java.asTypeName() to NUMBER,
-)
+
+    STRING to STRING,
+    BOOLEAN to BOOLEAN,
+    LONG to LONG,
+    SHORT to SHORT,
+    INT to INT,
+    FLOAT to FLOAT,
+    DOUBLE to DOUBLE,
+    NUMBER to NUMBER,
+
+    )
 
 /**
  * 集合的映射
