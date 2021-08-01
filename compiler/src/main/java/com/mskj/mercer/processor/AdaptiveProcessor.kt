@@ -9,7 +9,6 @@ import com.mskj.mercer.processor.util.collectConvert
 import com.mskj.mercer.processor.util.collectProviders
 import com.mskj.mercer.processor.util.toTypeName
 import com.mskj.mercer.annotate.Adaptive
-import com.mskj.mercer.core.OnAdaptiveRetrofit
 import com.mskj.mercer.core.ParameterValueConverterImpl
 import com.mskj.mercer.processor.constant.*
 import com.mskj.mercer.processor.handler.*
@@ -20,6 +19,7 @@ import javax.lang.model.SourceVersion
 import javax.lang.model.element.ElementKind
 import javax.lang.model.element.ExecutableElement
 import javax.lang.model.element.TypeElement
+import javax.lang.model.type.MirroredTypeException
 import javax.lang.model.util.Elements
 import javax.lang.model.util.Types
 import javax.tools.Diagnostic
@@ -69,7 +69,6 @@ class AdaptiveProcessor : AbstractProcessor() {
             providers.clear()
             converters.clear()
             try {
-
                 listOf(*adaptiveElements.toTypedArray())
                     .asSequence()
                     .filterIsInstance<TypeElement>()
@@ -77,14 +76,21 @@ class AdaptiveProcessor : AbstractProcessor() {
                         it.kind == ElementKind.INTERFACE
                     }.map { typeElement ->
                         // 解析额外数据 方便后续的传递和使用
-                        val url: String = typeElement.getAnnotation(Adaptive::class.java).value
+                        val adaptive = typeElement.getAnnotation(Adaptive::class.java)
+                        val fixed: String = adaptive.fixed
+                        val dynamic = try {
+                            adaptive.dynamic
+                            throw Exception()
+                        } catch (e: MirroredTypeException) {
+                            types.asElement(e.typeMirror).asType().toTypeName()
+                        }
                         val appends = typeElement.collectProviders(types, elements)
                         providers.addAll(appends)
 
                         val converter: TypeName = typeElement.collectConvert(types, elements)
                             ?: ParameterValueConverterImpl::class.asClassName()
                         converters.add(converter)
-                        TypeElementExtra(typeElement, url, converter, appends) to
+                        TypeElementExtra(typeElement, fixed to dynamic, converter, appends) to
                                 typeElement.enclosedElements
                     }.flatMap { (extra, elements) ->
                         // 展开类级元素 和 过滤掉非方法
@@ -106,8 +112,7 @@ class AdaptiveProcessor : AbstractProcessor() {
                         val serviceApiTypeName = extra.apiTypeName()
                         val packageName = extra.packageName()
                         val typeElement = extra.typeElement
-                        val url = extra.url
-
+                        val pair = extra.pair
                         val serviceTypeBuilder = TypeSpec.interfaceBuilder(serviceApiTypeName)
                             .addAnnotation(CLASS_NAME_KEEP)
 
@@ -132,12 +137,7 @@ class AdaptiveProcessor : AbstractProcessor() {
                             .addAnnotation(CLASS_NAME_KEEP)
                             .apply {
                                 serviceApi(packageName, serviceApiTypeName)
-                                companionTypeSpec(
-                                    returnType,
-                                    implTypeName,
-                                    url,
-                                    packageName
-                                )
+                                companionTypeSpec(returnType, implTypeName, pair, packageName)
                                 converter(converters)
                                 provider(providers)
                             }
@@ -181,7 +181,7 @@ class AdaptiveProcessor : AbstractProcessor() {
     private fun TypeSpec.Builder.companionTypeSpec(
         returnType: TypeName,
         implTypeName: String,
-        url: String,
+        pair: Pair<String, TypeName>,
         packageName: String
     ) {
         val cachePropertySpec = PropertySpec
@@ -209,11 +209,19 @@ class AdaptiveProcessor : AbstractProcessor() {
             )
             .build()
 
+        val (fixed, dynamic) = pair
         val noArgsFunSpec = FunSpec.builder(NAME_INVOKE)
             .addModifiers(KModifier.PUBLIC, KModifier.OPERATOR)
             .returns(returnType)
             .addAnnotation(JvmStatic::class.java)
-            .addStatement("return %N(%S)", NAME_INVOKE, url)
+            .apply {
+                val fix = fixed.trim()
+                if (fix.isNotBlank()) {
+                    addStatement("return %N(%S)", NAME_INVOKE, fix)
+                } else {
+                    addStatement("return %N(%T().%N())", NAME_INVOKE, dynamic, NAME_PROVIDER)
+                }
+            }
             .build()
 
         addType(

@@ -9,7 +9,7 @@ import javax.lang.model.element.TypeElement
 
 data class TypeElementExtra(
     val typeElement: TypeElement,
-    val url: String,
+    val pair: Pair<String, TypeName>,
     val converter: TypeName,
     val appends: List<AppendRecord>
 ) {

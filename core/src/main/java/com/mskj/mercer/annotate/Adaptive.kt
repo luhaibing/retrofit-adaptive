@@ -1,5 +1,9 @@
 package com.mskj.mercer.annotate
 
+import com.mskj.mercer.core.DynamicUrlProvider
+import com.mskj.mercer.core.EmptyDynamicUrlProvider
+import kotlin.reflect.KClass
+
 
 /**
  * retrofit 框架适配器
@@ -14,7 +18,8 @@ package com.mskj.mercer.annotate
 @Retention(AnnotationRetention.BINARY)
 @Target(AnnotationTarget.CLASS)
 annotation class Adaptive(
-    val value: String,
+    val fixed: String = "",
+    val dynamic: KClass<out DynamicUrlProvider> = EmptyDynamicUrlProvider::class,
 )
 
 

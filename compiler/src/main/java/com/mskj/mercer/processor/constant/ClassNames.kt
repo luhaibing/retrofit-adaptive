@@ -4,6 +4,7 @@ import com.mskj.mercer.processor.util.toClassName
 import com.mskj.mercer.annotate.Adaptive
 import com.mskj.mercer.annotate.JsonKey
 import com.mskj.mercer.core.AppendProvider
+import com.mskj.mercer.core.EmptyDynamicUrlProvider
 import com.mskj.mercer.core.OnAdaptiveRetrofit
 import com.mskj.mercer.core.ParameterValueConverter
 import com.squareup.kotlinpoet.*
@@ -131,3 +132,5 @@ val NULL_POINTER_EXCEPTION = NullPointerException::class.asClassName()
 
 // 锚点
 val ANCHOR = OnAdaptiveRetrofit::class.asClassName()
+
+val CLASS_NAME_EMPTY_DYNAMIC_URL = EmptyDynamicUrlProvider::class.asClassName()
