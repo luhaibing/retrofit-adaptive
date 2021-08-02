@@ -17,8 +17,11 @@ val ADAPTIVE_FACTORY_CLASS_NAME = Adaptive::class.java.typeName.toString()
  * 返回值类型
  */
 val CONTINUATION_CLASS_NAME = "kotlin.coroutines.Continuation".toClassName()
+val CLASS_NAME_COMPLETABLE_DEFERRED = "kotlinx.coroutines.CompletableDeferred".toClassName()
 val DEFERRED_CLASS_NAME = "kotlinx.coroutines.Deferred".toClassName()
 val FLOW_CLASS_NAME = "kotlinx.coroutines.flow.Flow".toClassName()
+val CLASS_NAME_COROUTINE_SCOPE = "kotlinx.coroutines.CoroutineScope".toClassName()
+val CLASS_NAME_DISPATCHERS = "kotlinx.coroutines.Dispatchers".toClassName()
 
 /**
  * 原始类型的映射

@@ -34,19 +34,23 @@ object TypeNameConverterImpl : Converter<TypeName, TypeName> {
                     input.outTypes[0]
                 } else {
                     input.inTypes[0]
-                } as ParameterizedTypeName
-                var rawType = effectiveValueTypeName.rawType
-                val typeArguments = effectiveValueTypeName.typeArguments
-                rawType = COLLECTION_SHINE_UPON[rawType] ?: rawType
-                rawType.parameterizedBy(typeArguments.map {
-                    convert(it)
-                })
+                }
+                if (effectiveValueTypeName is ParameterizedTypeName) {
+                    var rawType = effectiveValueTypeName.rawType
+                    val typeArguments = effectiveValueTypeName.typeArguments
+                    rawType = COLLECTION_SHINE_UPON[rawType] ?: rawType
+                    rawType.parameterizedBy(typeArguments.map {
+                        convert(it)
+                    })
+                } else {
+                    convert(effectiveValueTypeName)
+                }
             }
             else -> {
-                input.copy(nullable=nullable)
+                input.copy(nullable = nullable)
             }
         }
-        return output.copy(nullable=nullable)
+        return output.copy(nullable = nullable)
     }
 
 }

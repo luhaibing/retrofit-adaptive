@@ -83,8 +83,8 @@ data class MethodRecord(
 
     override fun convertServiceFun(): FunSpec.Builder {
         val builder = FunSpec.builder(name)
-            .returns(DEFERRED_CLASS_NAME.parameterizedBy(returnArgumentsType()))
-            .addModifiers(KModifier.ABSTRACT)
+            .returns(returnArgumentsType())
+            .addModifiers(KModifier.ABSTRACT, KModifier.SUSPEND)
 
         val parameterReorder = parameterReorder()
 
@@ -148,7 +148,6 @@ data class MethodRecord(
             }
         val methodStringBuilder = StringBuilder()
         methodStringBuilder.append("$NAME_SERVICE_API.${name}(")
-            .append("\r\n")
 
         val flatten = parameterReorder.values.take(parameterReorder.size - 1).flatten()
 
@@ -182,31 +181,54 @@ data class MethodRecord(
             methodStringBuilder
                 .append("$NAME_CONVERTER<%T>($nameMap)")
         }
-
-        methodStringBuilder.append("\r\n")
+        methodStringBuilder
             .append(")")
 
         when (returnRawType()) {
             DEFERRED_CLASS_NAME -> {
-                // Deferred
-                builder.addStatement("return $methodStringBuilder", converter ?: typeConverter)
+                /*
+                builder.addStatement(
+                    "val %N = %T()", NAME_DEFERRED,
+                    CLASS_NAME_COMPLETABLE_DEFERRED.parameterizedBy(returnArgumentsType())
+                )
+                builder.addStatement("%N.launch {", NAME_SCOPE)
+                builder.addStatement("try{")
+                builder.addCode("%N.", NAME_DEFERRED)
+                builder.addCode("complete($methodStringBuilder)", converter ?: typeConverter)
+                builder.addStatement("} catch (%N: %T) {", NAME_E, Exception::class.java)
+                builder.addStatement("%N.completeExceptionally(%N)", NAME_DEFERRED, NAME_E)
+                builder.addStatement("}")
+                builder.addStatement("}")
+                builder.addStatement("return %N", NAME_DEFERRED)
+                */
+
+                builder.addCode(
+                    "return %T().apply {$WRAP",
+                    CLASS_NAME_COMPLETABLE_DEFERRED.parameterizedBy(returnArgumentsType())
+                )
+                builder.addCode("%N.launch {$WRAP", NAME_SCOPE)
+                builder.addCode("try{$WRAP")
+                builder.addCode("complete($methodStringBuilder)$WRAP", converter ?: typeConverter)
+                builder.addCode("} catch (%N: %T) {$WRAP", NAME_E, Exception::class.java)
+                builder.addCode("completeExceptionally(%N)$WRAP", NAME_E)
+                builder.addCode("}")
+                builder.addCode("}")
+                builder.addCode("}")
             }
             FLOW_CLASS_NAME -> {
                 // Flow
-                builder.addCode("return flow{\r\n")
-                    .addCode("emit(\r\n")
+                builder.addCode("return flow{$WRAP")
+                    .addCode("emit(")
                     .addCode(methodStringBuilder.toString(), converter ?: typeConverter)
-                    .addCode(".await()")
-                    .addCode(")")
+                    .addCode(")$WRAP")
                     .addCode("}")
             }
             else -> {
-                // 挂起函数
-                builder.addCode("return ")
-                    .addCode(methodStringBuilder.toString(), converter ?: typeConverter)
-                    .addCode(".await()")
+                // suspend
+                builder.addStatement("return $methodStringBuilder", converter ?: typeConverter)
             }
         }
+
         return builder
     }
 

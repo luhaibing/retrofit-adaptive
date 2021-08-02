@@ -1,5 +1,6 @@
 package com.mercer.adaptive.processor.records
 
+import com.mercer.adaptive.processor.constant.WRAP
 import com.mercer.adaptive.processor.model.AnnotationSource
 import com.mercer.adaptive.processor.model.NORMAL
 import com.mercer.adaptive.processor.util.name
@@ -32,7 +33,7 @@ data class AnnotationRecord(
                             val list = value.map {
                                 it.toString().replace("\"", "")
                             }.map {
-                                "\r\n\"$it\""
+                                "$WRAP\"$it\""
                             }.toString()
                             builder.addMember("%L", list.substring(1, list.length - 1))
                         }
@@ -50,7 +51,7 @@ data class AnnotationRecord(
                                 val list = value.map {
                                     it.toString().replace("\"", "")
                                 }.map {
-                                    "\r\n\"$it\""
+                                    "$WRAP\"$it\""
                                 }.toString()
                                 builder.addMember("%N=%L", key, list)
                             }

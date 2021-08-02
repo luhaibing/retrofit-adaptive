@@ -51,8 +51,9 @@ class JsonContentTypeFunHandler(messenger: Messager) : FunHandler(messenger) {
                     substring
                 }
                 .toMutableSet()
-            values.add(record.annotations.find { it.typeName == JsonContent::class.asTypeName() }
-                ?.key() ?: JsonContent.DEFAULT_VALUE)
+            values.add(record.annotations.find {annotationRecord->
+                annotationRecord.typeName == JsonContent::class.asTypeName()
+            }?.key() ?: JsonContent.DEFAULT_VALUE)
             it.members["value"] = values.toMutableList()
         }
         serviceTypeSpec.addFunction(record.convertServiceFun().build())

@@ -1,16 +1,16 @@
 package com.mercer.adaptive.processor
 
+import com.mercer.adaptive.annotate.Adaptive
+import com.mercer.adaptive.core.ParameterValueConverterImpl
 import com.mercer.adaptive.processor.action.FunHandler
+import com.mercer.adaptive.processor.constant.*
 import com.mercer.adaptive.processor.converter.impl.TypeNameConverterImpl
+import com.mercer.adaptive.processor.impl.*
 import com.mercer.adaptive.processor.model.AppendRecord
 import com.mercer.adaptive.processor.model.TypeElementExtra
 import com.mercer.adaptive.processor.util.collectConvert
 import com.mercer.adaptive.processor.util.collectProviders
 import com.mercer.adaptive.processor.util.toTypeName
-import com.mercer.adaptive.annotate.Adaptive
-import com.mercer.adaptive.core.ParameterValueConverterImpl
-import com.mercer.adaptive.processor.constant.*
-import com.mercer.adaptive.processor.impl.*
 import com.squareup.kotlinpoet.*
 import com.squareup.kotlinpoet.ParameterizedTypeName.Companion.parameterizedBy
 import javax.annotation.processing.*
@@ -134,6 +134,7 @@ class AdaptiveProcessor : AbstractProcessor() {
                             )
                             .addAnnotation(CLASS_NAME_KEEP)
                             .apply {
+                                scope()
                                 serviceApi(packageName, serviceApiTypeName)
                                 companionTypeSpec(returnType, implTypeName, pair, packageName)
                                 converter(converters)
@@ -160,6 +161,7 @@ class AdaptiveProcessor : AbstractProcessor() {
                         FileSpec.get(packageName, implTypeSpec)
                             .toBuilder()
                             .addImport("kotlinx.coroutines.flow", "flow")
+                            .addImport("kotlinx.coroutines","launch")
                             .build()
                             .writeTo(filer)
 
@@ -175,13 +177,26 @@ class AdaptiveProcessor : AbstractProcessor() {
 
     }
 
+    private fun TypeSpec.Builder.scope() {
+        /*private val scope by lazy {
+            CoroutineScope(Dispatchers.IO)
+        }*/
+        addProperty(
+            PropertySpec.builder("scope", CLASS_NAME_COROUTINE_SCOPE)
+                .delegate(
+                    "lazy {$WRAP%T(%T.IO)$WRAP}",
+                    CLASS_NAME_COROUTINE_SCOPE, CLASS_NAME_DISPATCHERS
+                ).build()
+        )
+    }
+
     private fun TypeSpec.Builder.companionTypeSpec(
         returnType: TypeName, implTypeName: String,
         pair: Pair<String, TypeName>, packageName: String
     ) {
         val cachePropertySpec = PropertySpec
             .builder(NAME_CACHE_MAP, MUTABLE_MAP.parameterizedBy(STRING, returnType))
-            .delegate("lazy {\r\n%N()\r\n}", NAME_HASH_MAP_OF)
+            .delegate("lazy {$WRAP%N()$WRAP}", NAME_HASH_MAP_OF)
             .addModifiers(KModifier.PRIVATE)
             .build()
 
@@ -197,7 +212,7 @@ class AdaptiveProcessor : AbstractProcessor() {
                 "$NAME_URL can not be null or blank"
             )
             .addStatement(
-                "return %N[%N] ?: %T(%N).apply {\r\n%N[%N] = this\r\n}",
+                "return %N[%N] ?: %T(%N).apply {$WRAP%N[%N] = this$WRAP}",
                 NAME_CACHE_MAP, NAME_URL,
                 ClassName(packageName, implTypeName), NAME_URL,
                 NAME_CACHE_MAP, NAME_URL,
@@ -246,7 +261,7 @@ class AdaptiveProcessor : AbstractProcessor() {
             NAME_PROVIDERS, TypeNameConverterImpl.convert(
                 MUTABLE_MAP_STRING_APPEND_PROVIDER
             )
-        ).delegate("lazy {\r\n%N()\r\n}", NAME_HASH_MAP_OF)
+        ).delegate("lazy {$WRAP%N()$WRAP}", NAME_HASH_MAP_OF)
             .addModifiers(KModifier.PRIVATE, KModifier.FINAL)
         addProperty(providerPropertySpec.build())
 
@@ -271,18 +286,18 @@ class AdaptiveProcessor : AbstractProcessor() {
                     when (i) {
                         0 -> {
                             add(
-                                "%N = if (%N == %T::class.java.canonicalName) {\r\n",
+                                "%N = if (%N == %T::class.java.canonicalName) {$WRAP",
                                 NAME_PROVIDER, NAME_KEY, provider
                             )
                             addStatement("%T()", provider)
                         }
                         size - 1 -> {
-                            add("} else {\r\n")
+                            add("} else {$WRAP")
                             addStatement("%T()", provider)
                         }
                         else -> {
                             add(
-                                "} else if (%N == %T::class.java.canonicalName) {\r\n",
+                                "} else if (%N == %T::class.java.canonicalName) {$WRAP",
                                 NAME_KEY,
                                 provider
                             )
@@ -315,7 +330,7 @@ class AdaptiveProcessor : AbstractProcessor() {
         val converterPropertySpec = PropertySpec.builder(
             NAME_CONVERTERS, TypeNameConverterImpl
                 .convert(MUTABLE_MAP_STRING_PARAMETER_VALUE_CONVERTER)
-        ).delegate("lazy {\r\n%N()\r\n}", NAME_HASH_MAP_OF)
+        ).delegate("lazy {$WRAP%N()$WRAP}", NAME_HASH_MAP_OF)
             .addModifiers(KModifier.PRIVATE, KModifier.FINAL)
         addProperty(converterPropertySpec.build())
 
@@ -344,18 +359,18 @@ class AdaptiveProcessor : AbstractProcessor() {
                     when (i) {
                         0 -> {
                             add(
-                                "%N = if (%N == %T::class.java.canonicalName) {\r\n",
+                                "%N = if (%N == %T::class.java.canonicalName) {$WRAP",
                                 NAME_CONVERTER, NAME_KEY, converter
                             )
                             addStatement("%T()", converter)
                         }
                         size - 1 -> {
-                            add("} else {\r\n")
+                            add("} else {$WRAP")
                             addStatement("%T()", converter)
                         }
                         else -> {
                             add(
-                                "} else if (%N == %T::class.java.canonicalName) {\r\n",
+                                "} else if (%N == %T::class.java.canonicalName) {$WRAP",
                                 NAME_KEY,
                                 converter
                             )
@@ -383,10 +398,32 @@ class AdaptiveProcessor : AbstractProcessor() {
         val serviceApiPropertySpec = PropertySpec.builder(
             NAME_SERVICE_API, serviceApiClassName
         ).delegate(
-            "lazy {\r\n%T().create<%T>(%N)\r\n}",
+            "lazy {$WRAP%T().create<%T>(%N)$WRAP}",
             CLASS_NAME_RETROFIT_MANAGER, serviceApiClassName, NAME_URL
         ).addModifiers(KModifier.PRIVATE)
         addProperty(serviceApiPropertySpec.build())
     }
+
+    //
+    //    override fun searchRepos1(page: Int, perPage: Int): Deferred<RepoResponse>
+    //            /*= CompletableDeferred<RepoResponse>().apply {
+    //                    scope.launch {
+    //                        try {
+    //                            complete(api.searchRepos1(page, perPage))
+    //                        } catch (e: Exception) {
+    //                            completeExceptionally(e)
+    //                        }
+    //                    }
+    //                }*/ {
+    //        val deferred = CompletableDeferred<RepoResponse>()
+    //        scope.launch {
+    //            try {
+    //                deferred.complete(api.searchRepos1(page, perPage))
+    //            } catch (e: Exception) {
+    //                deferred.completeExceptionally(e)
+    //            }
+    //        }
+    //        return deferred
+    //    }
 
 }

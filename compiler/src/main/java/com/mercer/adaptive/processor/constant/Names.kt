@@ -1,3 +1,5 @@
+@file:Suppress("unused")
+
 package com.mercer.adaptive.processor.constant
 
 import com.mercer.adaptive.core.Peach
@@ -34,3 +36,11 @@ const val NAME_PROVIDER = "provider"
 const val NAME_CONVERTERS = "converters"
 const val NAME_CONVERTER = "converter"
 const val NAME_CONVERT = "convert"
+
+const val NAME_DEFERRED = "deferred"
+const val NAME_E = "e"
+const val NAME_SCOPE = "scope"
+const val NAME_FLOW = "flow"
+
+// 换行
+const val WRAP = "\r\n"

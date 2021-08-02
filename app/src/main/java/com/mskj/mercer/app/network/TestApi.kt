@@ -175,4 +175,18 @@ interface TestApi {
         id: String
     ): Flow<NetResponse<Any>>
 
+    @DELETE("/orders/food/operation/order/takeaway/finish")
+    @JsonContent
+    suspend fun test15(
+        @Header("Accept-Language") lang: String,
+        @Url url: Long,
+        map1: HashMap<String, String>,
+    ): Map<String, Any>
+
+    @POST("/orders/food/operation/order/takeaway/finish/id")
+    @JsonContent
+    suspend fun test16(
+        id: String
+    ): Map<String, List<Set<String>>>
+
 }
