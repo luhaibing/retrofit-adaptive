@@ -14,6 +14,9 @@ import kotlin.reflect.KClass
  * 但是
  *  1.如果每个接口都新建Model类来传递,项目中就会增加很多类
  *  2.如果使用Map都传递,就无法很直观的看出接口需要哪些字段
+ *
+ *  ps: 当fixed为空串和dynamic为EmptyDynamicUrlProvider时,
+ *  不会生成无参的方法(伴生类的无参的 invoke 方法)
  */
 @Retention(AnnotationRetention.BINARY)
 @Target(AnnotationTarget.CLASS)

@@ -3,7 +3,6 @@ package com.mskj.mercer.app.network
 import android.service.autofill.UserData
 import com.google.gson.internal.LinkedTreeMap
 import com.mskj.mercer.annotate.Adaptive
-import com.mskj.mercer.annotate.Dynamic
 import com.mskj.mercer.annotate.JsonContent
 import com.mskj.mercer.annotate.JsonKey
 import com.mskj.mercer.app.model.NetResponse
@@ -12,7 +11,7 @@ import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.flow.Flow
 import retrofit2.http.*
 
-@Adaptive(dynamic = UrlProvider::class)
+@Adaptive()
 interface TestApi {
 
     @DELETE("/orders/food/operation/order/takeaway/finish")

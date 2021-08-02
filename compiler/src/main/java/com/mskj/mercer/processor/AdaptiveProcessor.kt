@@ -210,26 +210,32 @@ class AdaptiveProcessor : AbstractProcessor() {
             .build()
 
         val (fixed, dynamic) = pair
-        val noArgsFunSpec = FunSpec.builder(NAME_INVOKE)
-            .addModifiers(KModifier.PUBLIC, KModifier.OPERATOR)
-            .returns(returnType)
-            .addAnnotation(JvmStatic::class.java)
-            .apply {
-                val fix = fixed.trim()
-                if (fix.isNotBlank()) {
-                    addStatement("return %N(%S)", NAME_INVOKE, fix)
-                } else {
-                    addStatement("return %N(%T().%N())", NAME_INVOKE, dynamic, NAME_PROVIDER)
+        val noArgsFunSpec = if (fixed.isBlank() && dynamic == CLASS_NAME_EMPTY_DYNAMIC_URL) {
+            null
+        } else {
+            FunSpec.builder(NAME_INVOKE)
+                .addModifiers(KModifier.PUBLIC, KModifier.OPERATOR)
+                .returns(returnType)
+                .addAnnotation(JvmStatic::class.java)
+                .apply {
+                    val fix = fixed.trim()
+                    if (fix.isNotBlank()) {
+                        addStatement("return %N(%S)", NAME_INVOKE, fix)
+                    } else {
+                        addStatement("return %N(%T().%N())", NAME_INVOKE, dynamic, NAME_PROVIDER)
+                    }
                 }
-            }
-            .build()
+                .build()
+        }
 
         addType(
             TypeSpec.companionObjectBuilder(null)
                 .addModifiers(KModifier.PUBLIC)
                 .addProperty(cachePropertySpec)
                 .addFunction(oneArgsFunSpec)
-                .addFunction(noArgsFunSpec)
+                .apply {
+                    noArgsFunSpec?.let { addFunction(it) }
+                }
                 .build()
         )
     }
