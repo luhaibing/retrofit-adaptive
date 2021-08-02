@@ -1,6 +1,6 @@
 package com.mskj.mercer.app.provider
 
-import com.mskj.mercer.core.DynamicUrlProvider
+import com.mercer.adaptive.core.DynamicUrlProvider
 
 /**
  * @author      ：mercer

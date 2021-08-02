@@ -9,7 +9,7 @@ android {
     buildToolsVersion "30.0.3"
 
     defaultConfig {
-        applicationId "com.mskj.mercer.app"
+        applicationId "com.mercer.adaptive.app"
         minSdkVersion 16
         targetSdkVersion 30
         versionCode 1
@@ -46,9 +46,6 @@ dependencies {
 
     implementation project(':core')
     kapt project(':compiler')
-
-//    implementation "com.mskj.mercer:adaptive-retrofit-core:2.0.1"
-//    kapt "com.mskj.mercer:adaptive-retrofit-compiler:2.0.1"
 
     implementation 'androidx.appcompat:appcompat:1.3.0'
 

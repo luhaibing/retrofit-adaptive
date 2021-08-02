@@ -2,11 +2,10 @@ package com.mskj.mercer.app.network
 
 import android.service.autofill.UserData
 import com.google.gson.internal.LinkedTreeMap
-import com.mskj.mercer.annotate.Adaptive
-import com.mskj.mercer.annotate.JsonContent
-import com.mskj.mercer.annotate.JsonKey
+import com.mercer.adaptive.annotate.Adaptive
+import com.mercer.adaptive.annotate.JsonContent
+import com.mercer.adaptive.annotate.JsonKey
 import com.mskj.mercer.app.model.NetResponse
-import com.mskj.mercer.app.provider.UrlProvider
 import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.flow.Flow
 import retrofit2.http.*

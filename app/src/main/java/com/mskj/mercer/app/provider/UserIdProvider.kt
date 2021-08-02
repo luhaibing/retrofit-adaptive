@@ -1,6 +1,6 @@
 package com.mskj.mercer.app.provider
 
-import com.mskj.mercer.core.AppendProvider
+import com.mercer.adaptive.core.AppendProvider
 
 class UserIdProvider : AppendProvider {
 

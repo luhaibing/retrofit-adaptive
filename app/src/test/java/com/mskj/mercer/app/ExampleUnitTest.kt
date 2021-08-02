@@ -1,4 +1,4 @@
-package com.mskj.mercer.app
+package com.mercer.adaptive.app
 
 import org.junit.Test
 
