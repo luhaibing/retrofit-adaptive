@@ -2,22 +2,24 @@ package com.mercer.adaptive.processor.action
 
 import com.mercer.adaptive.processor.records.MethodRecord
 import com.squareup.kotlinpoet.TypeSpec
+import javax.annotation.processing.Messager
 import javax.lang.model.element.TypeElement
+import javax.tools.Diagnostic
 
 /**
  * 方法分析器
- * 处理
  */
-interface FunHandler {
+abstract class FunHandler(private val messenger: Messager) {
+
+    protected fun error(message: String) {
+        messenger.printMessage(Diagnostic.Kind.ERROR, message)
+    }
 
     /**
      * 匹配
      * @param record                方法元素生成的信息
      */
-    fun match(
-        typeElement: TypeElement,
-        record: MethodRecord
-    ): Boolean
+    abstract fun match(typeElement: TypeElement, record: MethodRecord): Boolean
 
     /**
      * 分析和处理
@@ -26,11 +28,9 @@ interface FunHandler {
      * @param implTypeSpec          原有接口类的实现类
      * @param serviceTypeSpec       生成的间接的接口类
      */
-    fun handle(
-        typeElement: TypeElement,
-        record: MethodRecord,
-        implTypeSpec: TypeSpec.Builder,
-        serviceTypeSpec: TypeSpec.Builder
+    abstract fun handle(
+        typeElement: TypeElement, record: MethodRecord,
+        implTypeSpec: TypeSpec.Builder, serviceTypeSpec: TypeSpec.Builder
     )
 
 }

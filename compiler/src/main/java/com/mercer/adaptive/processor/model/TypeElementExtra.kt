@@ -1,8 +1,10 @@
 package com.mercer.adaptive.processor.model
 
+import com.mercer.adaptive.processor.action.OnDerivativeNamed
 import com.mercer.adaptive.processor.constant.API_SUFFIX
 import com.mercer.adaptive.processor.constant.IMPL_SUFFIX
 import com.mercer.adaptive.processor.constant.SERVICE_API_SUFFIX
+import com.mercer.adaptive.processor.impl.OnDerivativeNamedImpl
 import com.mercer.adaptive.processor.util.name
 import com.squareup.kotlinpoet.TypeName
 import javax.lang.model.element.TypeElement
@@ -12,20 +14,8 @@ data class TypeElementExtra(
     val pair: Pair<String, TypeName>,
     val converter: TypeName,
     val appends: List<AppendRecord>
-) {
+) : OnDerivativeNamed by OnDerivativeNamedImpl(typeElement) {
 
     fun packageName() = typeElement.enclosingElement.toString()
-
-    fun typeName() = typeElement.name()
-
-    fun implTypeName() = typeName() + IMPL_SUFFIX
-
-    fun apiTypeName() = typeName().let {
-        if (it.substring(it.length - API_SUFFIX.length).equals(API_SUFFIX, true)) {
-            it.substring(0, it.length - API_SUFFIX.length) + SERVICE_API_SUFFIX
-        } else {
-            it + SERVICE_API_SUFFIX
-        }
-    }
 
 }

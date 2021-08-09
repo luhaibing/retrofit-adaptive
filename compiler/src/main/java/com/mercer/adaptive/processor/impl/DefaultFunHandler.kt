@@ -1,13 +1,13 @@
-package com.mercer.adaptive.processor.handler
+package com.mercer.adaptive.processor.impl
 
-import com.mercer.adaptive.processor.action.BaseFunHandler
+import com.mercer.adaptive.processor.action.FunHandler
 import com.mercer.adaptive.processor.model.ContentType
 import com.mercer.adaptive.processor.records.MethodRecord
 import com.squareup.kotlinpoet.TypeSpec
 import javax.annotation.processing.Messager
 import javax.lang.model.element.TypeElement
 
-class DefaultFunHandler(messenger: Messager) : BaseFunHandler(messenger) {
+class DefaultFunHandler(messenger: Messager) : FunHandler(messenger) {
 
     /**
      * 只有没有指定请求体的格式就属于默认情况

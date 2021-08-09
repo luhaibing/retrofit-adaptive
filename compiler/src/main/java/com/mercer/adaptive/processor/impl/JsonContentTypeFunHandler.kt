@@ -1,7 +1,7 @@
-package com.mercer.adaptive.processor.handler
+package com.mercer.adaptive.processor.impl
 
 import com.mercer.adaptive.annotate.JsonContent
-import com.mercer.adaptive.processor.action.BaseFunHandler
+import com.mercer.adaptive.processor.action.FunHandler
 import com.mercer.adaptive.processor.model.ContentType
 import com.mercer.adaptive.processor.model.NORMAL
 import com.mercer.adaptive.processor.records.AnnotationRecord
@@ -12,7 +12,7 @@ import retrofit2.http.Headers
 import javax.annotation.processing.Messager
 import javax.lang.model.element.TypeElement
 
-class JsonContentTypeFunHandler(messenger: Messager) : BaseFunHandler(messenger) {
+class JsonContentTypeFunHandler(messenger: Messager) : FunHandler(messenger) {
 
     override fun match(
         typeElement: TypeElement, record: MethodRecord

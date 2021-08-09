@@ -2,7 +2,6 @@ package com.mercer.adaptive.processor
 
 import com.mercer.adaptive.processor.action.FunHandler
 import com.mercer.adaptive.processor.converter.impl.TypeNameConverterImpl
-import com.mercer.adaptive.processor.impl.FunAnalyerImpl
 import com.mercer.adaptive.processor.model.AppendRecord
 import com.mercer.adaptive.processor.model.TypeElementExtra
 import com.mercer.adaptive.processor.util.collectConvert
@@ -11,7 +10,7 @@ import com.mercer.adaptive.processor.util.toTypeName
 import com.mercer.adaptive.annotate.Adaptive
 import com.mercer.adaptive.core.ParameterValueConverterImpl
 import com.mercer.adaptive.processor.constant.*
-import com.mercer.adaptive.processor.handler.*
+import com.mercer.adaptive.processor.impl.*
 import com.squareup.kotlinpoet.*
 import com.squareup.kotlinpoet.ParameterizedTypeName.Companion.parameterizedBy
 import javax.annotation.processing.*
@@ -62,7 +61,7 @@ class AdaptiveProcessor : AbstractProcessor() {
     ): Boolean {
         val adaptiveElements =
             roundEnvironment?.getElementsAnnotatedWith(Adaptive::class.java)
-        val funAnalyer = FunAnalyerImpl(types, elements)
+        val funAnalyzer = FunAnalyerImpl(types, elements)
         if (adaptiveElements.isNullOrEmpty()) {
             return true
         } else {
@@ -99,7 +98,7 @@ class AdaptiveProcessor : AbstractProcessor() {
                         }
                     }.map { (extra, element) ->
                         // 方法分析/解析
-                        extra to funAnalyer.convert(element, extra.appends, providers, converters)
+                        extra to funAnalyzer.convert(element, extra.appends, providers, converters)
                     }.groupBy({ (extra, _) ->
                         extra
                     }, { (_, element) ->
@@ -107,9 +106,8 @@ class AdaptiveProcessor : AbstractProcessor() {
                     }).map { (extra, records) ->
 
                         // 生成类的描述文件
-
-                        val implTypeName = extra.implTypeName()
-                        val serviceApiTypeName = extra.apiTypeName()
+                        val implTypeName = extra.implType()
+                        val serviceApiTypeName = extra.serviceType()
                         val packageName = extra.packageName()
                         val typeElement = extra.typeElement
                         val pair = extra.pair
@@ -168,7 +166,6 @@ class AdaptiveProcessor : AbstractProcessor() {
                         FileSpec.get(packageName, serviceTypeSpec).writeTo(filer)
                     }
                     .toList()
-
             } catch (throwable: Throwable) {
                 messenger.printMessage(Diagnostic.Kind.ERROR, throwable.message)
                 throwable.printStackTrace()
@@ -179,10 +176,8 @@ class AdaptiveProcessor : AbstractProcessor() {
     }
 
     private fun TypeSpec.Builder.companionTypeSpec(
-        returnType: TypeName,
-        implTypeName: String,
-        pair: Pair<String, TypeName>,
-        packageName: String
+        returnType: TypeName, implTypeName: String,
+        pair: Pair<String, TypeName>, packageName: String
     ) {
         val cachePropertySpec = PropertySpec
             .builder(NAME_CACHE_MAP, MUTABLE_MAP.parameterizedBy(STRING, returnType))
